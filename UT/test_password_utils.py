@@ -1,6 +1,6 @@
 import pytest
 
-from Utils.password_utils import hash_password, check_password
+from Utils.password_utils import hash_password, check_password, validate_password_strength
 
 
 @pytest.mark.parametrize(
@@ -95,3 +95,47 @@ def test_verify_password_incorrect_data(plain_text_password, expected_password) 
     # Assert
     assert isinstance(result, bool)
     assert result is False
+
+
+@pytest.mark.parametrize(
+    "plain_text_password, expected_result",
+    [
+        pytest.param(
+            "short",
+            (False, "Password too short!"),
+            id="Too short password hashed password"
+        ),
+        pytest.param(
+            "",
+            (False, "Password too short!"),
+            id="Empty password"
+        ),
+        pytest.param(
+            "aB12!!jjjaaaa6465NSJJ",
+            True,
+            id="Correct password"
+        ),
+        pytest.param(
+            "weakPassword",
+            (False, "Weak password! Please use number, small and capital letter and special character."),
+            id="Weak password"
+        ),
+        pytest.param(
+            "weakPassword134111",
+            (False, "Weak password! Please use number, small and capital letter and special character."),
+            id="Weak password with numbers"
+        )
+    ]
+)
+def test_validate_password_strength(plain_text_password, expected_result) -> None:
+    """
+    Check whether function validate_password_strength behaves correctly
+    Args:
+        plain_text_password: Plain text password from GUI
+        expected_result: Boolean value or tuple(bool, str)
+
+    Returns:
+        None
+    """
+    # Assert
+    assert validate_password_strength(plain_text_password) == expected_result

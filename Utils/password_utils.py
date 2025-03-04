@@ -20,3 +20,33 @@ def check_password(password: str, hashed_password: str) -> bool:
         bool: True if the password matches, False otherwise.
     """
     return bcrypt.checkpw(password.encode(), hashed_password.encode())
+
+
+def validate_password_strength(password_to_validate: str) -> bool | tuple[bool, str]:
+    """
+    Function to check if password meets the minimum requirements.
+    """
+    if len(password_to_validate) < 8:
+        return False, "Password too short!"
+
+    password_requirements = {
+        "small_letter": 0,
+        "capital_letter": 0,
+        "number": 0,
+        "special_character": 0,
+    }
+
+    for char in password_to_validate:
+        if char.islower():
+            password_requirements["small_letter"] += 1
+        elif char.isupper():
+            password_requirements["capital_letter"] += 1
+        elif char.isdigit():
+            password_requirements["number"] += 1
+        elif not char.isalnum():
+            password_requirements["special_character"] += 1
+
+    if all(value >= 1 for value in password_requirements.values()):
+        return True
+    else:
+        return False, "Weak password! Please use number, small and capital letter and special character."
