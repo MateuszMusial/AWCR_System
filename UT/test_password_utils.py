@@ -112,7 +112,7 @@ def test_verify_password_incorrect_data(plain_text_password, expected_password) 
         ),
         pytest.param(
             "aB12!!jjjaaaa6465NSJJ",
-            True,
+            (True, None),
             id="Correct password"
         ),
         pytest.param(
