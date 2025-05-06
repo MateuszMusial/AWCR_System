@@ -20,7 +20,7 @@ from Utils.password_utils import hash_password, check_password, validate_passwor
         )
     ]
 )
-def test_hash_password(plain_text_password) -> None:
+def test_hash_password(plain_text_password: str) -> None:
     """
     Test whether password is hashed correctly.
     """
@@ -54,7 +54,7 @@ def test_hash_password(plain_text_password) -> None:
         )
     ]
 )
-def test_verify_password(plain_text_password, expected_password) -> None:
+def test_verify_password(plain_text_password: str, expected_password: str) -> None:
     """
     Test whether password is verified correctly.
     Tests with correct data.
@@ -83,7 +83,7 @@ def test_verify_password(plain_text_password, expected_password) -> None:
         )
     ]
 )
-def test_verify_password_incorrect_data(plain_text_password, expected_password) -> None:
+def test_verify_password_incorrect_data(plain_text_password: str, expected_password: str) -> None:
     """
     Test whether password is verified correctly.
     Tests with incorrect data.
@@ -127,7 +127,7 @@ def test_verify_password_incorrect_data(plain_text_password, expected_password) 
         )
     ]
 )
-def test_validate_password_strength(plain_text_password, expected_result) -> None:
+def test_validate_password_strength(plain_text_password: str, expected_result: str) -> None:
     """
     Check whether function validate_password_strength behaves correctly
     Args:

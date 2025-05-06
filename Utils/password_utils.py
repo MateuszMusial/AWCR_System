@@ -1,11 +1,16 @@
 import bcrypt
 
+import logger
+from typing import Any
+
+logger = logger.get_logger("password_utils logger")
+
 
 def hash_password(password: str) -> str:
     """Function to encrypt plain text password provided by user."""
     salt = bcrypt.gensalt()
-    encrypted_password = bcrypt.hashpw(password.encode(), salt)
-    return encrypted_password.decode()
+    encrypted_password = bcrypt.hashpw(password.encode(encoding="utf-8"), salt)
+    return encrypted_password.decode(encoding="utf-8")
 
 
 def check_password(password: str, hashed_password: str) -> bool:
@@ -22,7 +27,7 @@ def check_password(password: str, hashed_password: str) -> bool:
     return bcrypt.checkpw(password.encode(), hashed_password.encode())
 
 
-def validate_password_strength(password_to_validate: str) -> tuple[bool, any] | tuple[bool, str]:
+def validate_password_strength(password_to_validate: str) -> tuple[bool, Any] | tuple[bool, str]:
     """
     Function to check if password meets the minimum requirements.
     """
@@ -50,3 +55,12 @@ def validate_password_strength(password_to_validate: str) -> tuple[bool, any] | 
         return True, None
     else:
         return False, "Weak password! Please use number, small and capital letter and special character."
+
+
+def get_password_from_file(path: str = "secret.txt") -> str:
+    try:
+        with open(path, "r") as f:
+            return f.read().strip()
+    except FileNotFoundError:
+        logger.error(f"Cannot find'{path}'file.")
+        raise RuntimeError(f"Cannot find'{path}'file.")
