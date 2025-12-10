@@ -1,10 +1,19 @@
 from datetime import datetime, timedelta
+from enum import Enum
 import pandas as pd
-
 import logger
 
-
 logger = logger.get_logger("Data utils logger")
+
+WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
+
+class Period(Enum):
+    TODAY = "Today"
+    LAST_WEEK = "Last week"
+    LAST_MONTH = "Last month"
+    LAST_YEAR = "Last year"
 
 
 def preprocess_detection_data(ocr_result: list[str]) -> str:
@@ -20,7 +29,7 @@ def preprocess_detection_data(ocr_result: list[str]) -> str:
     return ocr_result[0].strip().replace(" ", "").upper()
 
 
-def prepare_detection_data_for_plot(data, period: str) -> dict:
+def prepare_detection_data_for_plot(data: list[tuple], period: str) -> dict[str, int]:
     """
     Processes the detection data for plotting.
     Args:
@@ -37,8 +46,12 @@ def prepare_detection_data_for_plot(data, period: str) -> dict:
         logger.error("No detection data provided.")
         return {}
 
-    df = pd.DataFrame(data, columns=['id', 'license_plate', 'detection_time', 'car_id'])
-    df['detection_time'] = pd.to_datetime(df['detection_time'])
+    try:
+        df = pd.DataFrame(data, columns=['id', 'license_plate', 'detection_time', 'car_id'])
+        df['detection_time'] = pd.to_datetime(df['detection_time'])
+    except (ValueError, KeyError) as e:
+        logger.error(f"Failed to parse detection data: {e}")
+        return {}
 
     now = datetime.now()
 
@@ -51,11 +64,9 @@ def prepare_detection_data_for_plot(data, period: str) -> dict:
         case "Last week":
             week_ago = now - timedelta(days=7)
             df = df[df['detection_time'] >= week_ago]
-
             df['weekday'] = df['detection_time'].dt.day_name().str[:3]
-            weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
             counts = df['weekday'].value_counts().to_dict()
-            result = {day: counts.get(day, 0) for day in weekdays}
+            result = {day: counts.get(day, 0) for day in WEEKDAYS}
 
         case "Last month":
             month_ago = now - timedelta(days=30)
@@ -66,17 +77,32 @@ def prepare_detection_data_for_plot(data, period: str) -> dict:
         case "Last year":
             year_ago = now - timedelta(days=365)
             df = df[df['detection_time'] >= year_ago]
-
             df['month'] = df['detection_time'].dt.month_name().str[:3]
-
-            months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-                      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-
             counts = df['month'].value_counts().to_dict()
-            result = {month: counts.get(month, 0) for month in months}
+            result = {month: counts.get(month, 0) for month in MONTHS}
 
         case _:
             logger.error(f"Unknown period: {period}")
             return {}
-
     return result
+
+
+def export_detection_data_to_csv(data: list[tuple]) -> None:
+    """
+    Exports the detection data to a CSV file.
+    Args:
+        data: Detection data from the database.
+    """
+    if not data:
+        logger.error("No detection data to export.")
+        return
+
+    try:
+        df = pd.DataFrame(data, columns=['id', 'license_plate', 'detection_time', 'car_id'])
+        df['detection_time'] = pd.to_datetime(df['detection_time'])
+
+        filename = f"detections_{datetime.now().strftime('%Y-%m-%d_%H_%M_%S')}.csv"
+        df.to_csv(filename, index=False)
+        logger.info(f"Detection data exported to {filename}")
+    except (ValueError, IOError) as e:
+        logger.error(f"Failed to export detection data: {e}")

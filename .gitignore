@@ -1,7 +1,15 @@
 
 # Virtual Environment
 .venv/
+venv
 
 Logs/
 
-.idea/
+.idea/*
+
+# sensitive info
+secret.txt
+
+#cache
+.pytest_cache
+.mypy_cache

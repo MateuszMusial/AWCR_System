@@ -1,5 +1,6 @@
 import smtplib
 import logger
+from email.message import EmailMessage
 
 from Utils.password_utils import get_password_from_file
 
@@ -21,14 +22,23 @@ class EmailHandler:
         Args:
             detection (str): String containing information about the detected car.
         """
+        msg = EmailMessage()
+        msg['Subject'] = 'AWCR System detection report.'
+        msg['From'] = AWCR_SYSTEM_EMAIL
+        msg['To'] = self.logged_user
+
+        body = (
+            "Detection Report:\n\n"
+            f"{detection}\n\n"
+            "Best regards,\n"
+            "AWCR Team"
+        )
+        msg.set_content(body)
 
         with smtplib.SMTP(self.host, port=587) as connection:
             connection.starttls()
             connection.login(user=AWCR_SYSTEM_EMAIL, password=PASSWORD)
-            connection.sendmail(
-                from_addr=AWCR_SYSTEM_EMAIL,
-                to_addrs=self.logged_user,
-                msg=detection)
+            connection.send_message(msg)
 
         logger.info(f"Sending detection email to {self.logged_user}")
 
@@ -36,14 +46,22 @@ class EmailHandler:
         """
         Send email to the user with the information about successful registration.
         """
+        msg = EmailMessage()
+        msg['Subject'] = 'Welcome to AWCR System!'
+        msg['From'] = AWCR_SYSTEM_EMAIL
+        msg['To'] = self.logged_user
+
+        body = (
+            "Hello,\n\n"
+            "You are successfully registered to AWCR System!\n\n"
+            "Best regards,\n"
+            "AWCR Team"
+        )
+        msg.set_content(body)
 
         with smtplib.SMTP(self.host, port=587) as connection:
             connection.starttls()
             connection.login(user=AWCR_SYSTEM_EMAIL, password=PASSWORD)
-            connection.sendmail(
-                from_addr=AWCR_SYSTEM_EMAIL,
-                to_addrs=self.logged_user,
-                msg="You are successfully registered to AWCR System!"
-            )
+            connection.send_message(msg)
 
         logger.info(f"Sending registration email to {self.logged_user}")

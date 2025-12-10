@@ -58,8 +58,11 @@ def validate_password_strength(password_to_validate: str) -> tuple[bool, Any] | 
 
 
 def get_password_from_file(path: str = "secret.txt") -> str:
+    """
+    Function to read password from file.
+    """
     try:
-        with open(path, "r") as f:
+        with open(path, "r", encoding="utf-8") as f:
             return f.read().strip()
     except FileNotFoundError:
         logger.error(f"Cannot find'{path}'file.")
