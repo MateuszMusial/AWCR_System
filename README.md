@@ -165,8 +165,61 @@ The **Confusion Matrix** below demonstrates the model's high true positive rate 
 <br />
 <br />
 
+<br />
+<br />
 
 ---
+
+<br />
+
+## 🚀 Getting Started
+
+Follow these steps to set up and run the **AWCR System** locally.
+
+### Prerequisites
+
+* **Python:** Version 3.9 or higher (recommended).
+* **Git:** For cloning the repository.
+* **A camera source** (e.g., webcam or IP camera stream URL) if testing live detection.
+
+<br />
+
+### 1. Installation
+
+#### A. Clone the Repository
+Open your terminal or command prompt and run the following command to download the project files:
+
+```bash
+git clone [https://github.com/YourUsername/AWCR-System.git](https://github.com/YourUsername/AWCR-System.git)
+cd AWCR-System
+```
+---
+#### B. Set Up Virtual Environment (Recommended)
+It is highly recommended to use a virtual environment to manage dependencies:
+
+```bash
+python -m venv venv
+# Activate the environment:
+# On Windows:
+.\venv\Scripts\activate
+# On macOS/Linux:
+source venv/bin/activate
+```
+
+#### C. Install Dependencies
+Install all required libraries, including Pytest, YOLO, and OpenCV components:
+
+```bash
+pip install -r requirements.txt
+```
+<br />
+
+### 2. Running the System
+Execute the main application file to launch the Graphical User Interface (GUI):
+
+```bash
+python main.py
+```
 
 <div align="center">
   <sub>**AWCR System** is released under the **MIT License**.</sub>
