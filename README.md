@@ -40,6 +40,41 @@ The **AWCR System** is designed with a modular architecture to ensure efficiency
 
 <br />
 
+## 🛠️ Technologies Used
+
+The **AWCR System** is built using a robust stack of open-source technologies, leveraging state-of-the-art object detection models.
+
+<br />
+
+<div align="center">
+
+| **Category** | **Technologies** |
+| :--- | :--- |
+| **Core Language** | ![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white) |
+| **Object Detection** | ![YOLO](https://img.shields.io/badge/YOLO-00FFFF?style=for-the-badge&logo=yolo&logoColor=black) |
+| **Computer Vision** | ![OpenCV](https://img.shields.io/badge/OpenCV-5C3EE8?style=for-the-badge&logo=opencv&logoColor=white) |
+| **Data & Analytics** | ![Pandas](https://img.shields.io/badge/pandas-%23150458.svg?style=for-the-badge&logo=pandas&logoColor=white) ![Matplotlib](https://img.shields.io/badge/Matplotlib-%23ffffff.svg?style=for-the-badge&logo=Matplotlib&logoColor=black) |
+| **Testing** | ![Pytest](https://img.shields.io/badge/pytest-%23ffffff.svg?style=for-the-badge&logo=pytest&logoColor=2f9ed9) |
+| **Database** | ![SQLite](https://img.shields.io/badge/sqlite-%2307405e.svg?style=for-the-badge&logo=sqlite&logoColor=white) |
+| **Tools & IDE** | ![Git](https://img.shields.io/badge/git-%23F05033.svg?style=for-the-badge&logo=git&logoColor=white) ![PyCharm](https://img.shields.io/badge/PyCharm-000000?style=for-the-badge&logo=pycharm&logoColor=white) |
+
+</div>
+
+<br />
+
+### 📚 Key Libraries & Frameworks
+* **YOLO (You Only Look Once):** Implemented for high-speed, real-time license plate detection and recognition.
+* **OpenCV:** Used for image pre-processing and video stream handling.
+* **Pandas:** Utilized for efficient data manipulation and managing detection logs.
+* **Pytest:** Ensures code reliability and system stability through automated testing.
+* **Tkinter / CustomTkinter:** Powers the user interface.
+
+<br />
+
+---
+
+<br />
+
 ## 📸 Application Demonstration
 
 Below is a visual demonstration of the system operating in real-time.
