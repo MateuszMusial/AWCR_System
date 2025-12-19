@@ -16,11 +16,14 @@ class EmailHandler:
         self.host = "smtp.gmail.com"
         self.port = 587
 
-    def send_detected_car_information_email(self, detection: str) -> None:
+    def send_detected_car_information_email(self, *, brand: str, model: str, licence_plate: str) -> None:
         """
-        Send email to the user with the information about detected car.
+        Send email to the user with the information about a detected car.
+        This method accepts only keyword arguments.
         Args:
-            detection (str): String containing information about the detected car.
+            brand (str): The brand of the detected car.
+            model (str): The model of the detected car.
+            licence_plate (str): The licence plate of the detected car.
         """
         msg = EmailMessage()
         msg['Subject'] = 'AWCR System detection report.'
@@ -29,16 +32,21 @@ class EmailHandler:
 
         body = (
             "Detection Report:\n\n"
-            f"{detection}\n\n"
+            "Wanted car decetcted!\n"
+            f"Detected wanted car {brand} {model}\n"
+            f"with {licence_plate} licence plate!\n\n"
             "Best regards,\n"
             "AWCR Team"
         )
         msg.set_content(body)
 
-        with smtplib.SMTP(self.host, port=587) as connection:
-            connection.starttls()
-            connection.login(user=AWCR_SYSTEM_EMAIL, password=PASSWORD)
-            connection.send_message(msg)
+        try:
+            with smtplib.SMTP(self.host, port=587) as connection:
+                connection.starttls()
+                connection.login(user=AWCR_SYSTEM_EMAIL, password=PASSWORD)
+                connection.send_message(msg)
+        except smtplib.SMTPException as e:
+            logger.error(f"Failed to send email: {e}")
 
         logger.info(f"Sending detection email to {self.logged_user}")
 
@@ -59,9 +67,12 @@ class EmailHandler:
         )
         msg.set_content(body)
 
-        with smtplib.SMTP(self.host, port=587) as connection:
-            connection.starttls()
-            connection.login(user=AWCR_SYSTEM_EMAIL, password=PASSWORD)
-            connection.send_message(msg)
+        try:
+            with smtplib.SMTP(self.host, port=587) as connection:
+                connection.starttls()
+                connection.login(user=AWCR_SYSTEM_EMAIL, password=PASSWORD)
+                connection.send_message(msg)
+        except smtplib.SMTPException as e:
+            logger.error(f"Failed to send email: {e}")
 
         logger.info(f"Sending registration email to {self.logged_user}")
