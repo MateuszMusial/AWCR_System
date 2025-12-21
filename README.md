@@ -91,6 +91,9 @@ The application identifies the license plate within the video feed and verifies 
   <br /><br />
   <img width="80%" src="https://github.com/user-attachments/assets/77fea309-ad24-4ce9-876e-917910e74173" alt="Camera View 2" />
   <br /><br />
+  <h4>📧 Registration Email</h4>
+  <img width="80%" src="https://github.com/user-attachments/assets/4973c6d0-78b2-4fe0-99df-fd1a6676dcc5" alt="Registration email"/>
+  <br /><br />
   <img width="80%" alt="image" src="https://github.com/user-attachments/assets/4ee1145a-8e4d-4ff7-8ee8-ddc2845ef0f6" alt="Camera View 3" />
 </div>
 
@@ -214,7 +217,19 @@ pip install -r requirements.txt
 ```
 <br />
 
-### 2. Running the System
+#### D. Database & Configuration
+### Before launching the system, ensure the following files are present in the root directory:
+
+Database: The system requires an SQL database file named ```awcr_database```.
+
+You can create this file by importing the schema located in ```Database/schema.sql```.
+
+Secrets: Create a file named ```secret.txt``` in the root directory.
+This file must contain the database password required for the connection.
+
+<br />
+
+##### 2. Running the System
 Execute the main application file to launch the Graphical User Interface (GUI):
 
 ```bash
