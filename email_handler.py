@@ -69,9 +69,9 @@ class EmailHandler:
 
                 <h3>What you can do now:</h3>
                 <ul>
-                    <li>✓ Monitor vehicles on your watchlist</li>
-                    <li>✓ Receive notifications about detected cars</li>
-                    <li>✓ Manage detections data</li>
+                    <li> Monitor vehicles on your watchlist</li>
+                    <li> Receive notifications about detected cars</li>
+                    <li> Manage detections data</li>
                 </ul>
 
                 <p>Best regards,<br><strong>AWCR Team</strong></p>

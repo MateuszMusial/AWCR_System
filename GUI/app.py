@@ -141,6 +141,9 @@ class GuiHandler:
         logger.debug("Login window created successfully.")
 
     def setup_register_window(self) -> None:
+        """
+        Set up the register window with all necessarily fields.
+        """
         self.window.destroy()
 
         ttk.Style.instance = None
@@ -182,7 +185,10 @@ class GuiHandler:
 
         logger.debug("Register window created successfully.")
 
-    def login(self):
+    def login(self) -> None:
+        """
+        Logs in the user if the email and password are correct.
+        """
         global email_handler
         email = self.email_entry.get()
         password = self.password_entry.get()
@@ -212,6 +218,9 @@ class GuiHandler:
         return self.register_password_entry.get() == self.confirm_password_entry.get()
 
     def register_user(self) -> None:
+        """
+        Registers a new user in the system.
+        """
         global email_handler
 
         email = self.register_email_entry.get()
@@ -229,7 +238,8 @@ class GuiHandler:
                 messagebox.showinfo("Success!", message)
                 logger.info(f"User {email} registered successfully!")
                 email_handler = EmailHandler(email)
-                email_handler.send_user_registered_information_email()
+
+                Thread(target=email_handler.send_user_registered_information_email, daemon=True).start()
                 self.window.destroy()
                 self.create_window("Login")
                 self.setup_login_window()
