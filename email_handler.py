@@ -59,20 +59,47 @@ class EmailHandler:
         msg['From'] = AWCR_SYSTEM_EMAIL
         msg['To'] = self.logged_user
 
-        body = (
-            "Hello,\n\n"
-            "You are successfully registered to AWCR System!\n\n"
-            "Best regards,\n"
-            "AWCR Team"
-        )
-        msg.set_content(body)
+        image_path = 'awcrLogo.png'
+
+        body_html = """
+        <html>
+            <body style="font-family: Arial, sans-serif; color: #333;">
+                <h2>🎉 Congratulations!</h2>
+                <p>Your account in the AWCR system has been successfully created.</p>
+
+                <h3>What you can do now:</h3>
+                <ul>
+                    <li>✓ Monitor vehicles on your watchlist</li>
+                    <li>✓ Receive notifications about detected cars</li>
+                    <li>✓ Manage detections data</li>
+                </ul>
+
+                <p>Best regards,<br><strong>AWCR Team</strong></p>
+                <img src="cid:awcrLogo" alt="AWCR Logo" style="width: 150px; margin-bottom: 20px;">
+            </body>
+        </html>
+        """
+
+        msg.set_content(body_html, subtype='html')
+
+        if image_path:
+            try:
+                with open(image_path, 'rb') as attachment:
+                    file_data = attachment.read()
+                    msg.add_related(
+                        file_data,
+                        maintype='image',
+                        subtype='png',
+                        cid='awcrLogo'
+                    )
+            except FileNotFoundError:
+                logger.error(f"Logo image not found at {image_path}")
 
         try:
             with smtplib.SMTP(self.host, port=587) as connection:
                 connection.starttls()
                 connection.login(user=AWCR_SYSTEM_EMAIL, password=PASSWORD)
                 connection.send_message(msg)
+                logger.info(f"Sending registration email to {self.logged_user}")
         except smtplib.SMTPException as e:
             logger.error(f"Failed to send email: {e}")
-
-        logger.info(f"Sending registration email to {self.logged_user}")
