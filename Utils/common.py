@@ -3,7 +3,7 @@ from tkinter import messagebox
 import logger
 
 
-logger = logger.get_logger("Common utils logger")
+awcr_logger = logger.get_logger("Common utils logger")
 
 
 def display_detection_info(brand: str, model: str, licence_plate: str) -> None:
@@ -14,7 +14,7 @@ def display_detection_info(brand: str, model: str, licence_plate: str) -> None:
         model (str): The model of the car.
         licence_plate (str): The license plate of the car.
     """
-    logger.info(f"Detected wanted car {brand} {model} with {licence_plate} licence plate!")
+    awcr_logger.info(f"Detected wanted car {brand} {model} with {licence_plate} licence plate!")
 
     messagebox.showwarning(
         "Wanted car detected!\n",

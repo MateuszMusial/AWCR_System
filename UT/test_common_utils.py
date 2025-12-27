@@ -23,7 +23,7 @@ def test_displays_message_box_with_correct_info(mock_logger_info, mock_messagebo
 
 
 @patch("Utils.common.messagebox.showwarning", side_effect=Exception("Messagebox error"))
-@patch("Utils.common.logger.info")
+@patch("Utils.common.awcr_logger.info")
 def test_handles_messagebox_error_gracefully(mock_logger_info, mock_messagebox):
     brand = "Ford"
     model = "Focus"

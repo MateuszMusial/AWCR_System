@@ -25,7 +25,7 @@ from Utils.password_utils import validate_password_strength
 from Utils.data_utils import preprocess_detection_data, prepare_detection_data_for_plot, export_detection_data_to_csv
 
 
-logger = logger.get_logger("GUI logger")
+awcr_logger = logger.get_logger("GUI logger")
 db_handler = DBHandler()
 email_handler = None
 
@@ -56,10 +56,10 @@ class GuiHandler:
             self.window.title(name)
             self.style = Style(theme='darkly')
 
-            logger.debug(f"Created {self.window.title()} window successfully!")
+            awcr_logger.debug(f"Created {self.window.title()} window successfully!")
             return self.window
         except Exception as e:
-            logger.error(f"Failed to create window: {e}")
+            awcr_logger.error(f"Failed to create window: {e}")
             return None
 
     def setup_login_register_window(self) -> None:
@@ -103,7 +103,7 @@ class GuiHandler:
         awcr_label = tkinter.Label(self.window, text='AWCR System', font=('Rockwell', 35))
         awcr_label.grid(row=8, column=0, columnspan=2, pady=15, sticky="ew")
 
-        logger.debug("Login/Register window created successfully.")
+        awcr_logger.debug("Login/Register window created successfully.")
 
     def setup_login_window(self) -> None:
         """
@@ -138,7 +138,7 @@ class GuiHandler:
         awcr_label = tkinter.Label(self.window, text='AWCR System', font=('Rockwell', 35))
         awcr_label.grid(row=8, column=0, columnspan=2, pady=15, sticky="ew")
 
-        logger.debug("Login window created successfully.")
+        awcr_logger.debug("Login window created successfully.")
 
     def setup_register_window(self) -> None:
         """
@@ -183,7 +183,7 @@ class GuiHandler:
         awcr_label = tkinter.Label(self.window, text='AWCR System', font=('Rockwell', 35))
         awcr_label.grid(row=9, column=0, columnspan=2, pady=15, sticky="ew")
 
-        logger.debug("Register window created successfully.")
+        awcr_logger.debug("Register window created successfully.")
 
     def login(self) -> None:
         """
@@ -197,10 +197,10 @@ class GuiHandler:
             email_handler = EmailHandler(email)
             session.assign_current_user(email)
             self.setup_main_layout()
-            logger.debug(f"User {email} logged successfully!")
+            awcr_logger.debug(f"User {email} logged successfully!")
         else:
             messagebox.showerror("Error!", "Invalid e-mail or password!")
-            logger.error(f"Invalid e-mail or password created for user: {email}")
+            awcr_logger.error(f"Invalid e-mail or password created for user: {email}")
             self.clear_login_fields()
 
     def clear_login_fields(self) -> None:
@@ -236,7 +236,7 @@ class GuiHandler:
             result, message = db_handler.add_user(email, password)
             if result:
                 messagebox.showinfo("Success!", message)
-                logger.info(f"User {email} registered successfully!")
+                awcr_logger.info(f"User {email} registered successfully!")
                 email_handler = EmailHandler(email)
 
                 Thread(target=email_handler.send_user_registered_information_email, daemon=True).start()
@@ -274,7 +274,7 @@ class GuiHandler:
 
         if not self.cap.isOpened():
             messagebox.showerror("Error", "Can't open the camera!")
-            logger.error("Error! Can't open the camera!")
+            awcr_logger.error("Error! Can't open the camera!")
             self.window.destroy()
             cv2.destroyAllWindows()
             return
@@ -282,7 +282,7 @@ class GuiHandler:
         self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, CAMERA_WIDTH)
         self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, CAMERA_HEIGHT)
         self.cap.set(cv2.CAP_PROP_FPS, FPS_VALUE)
-        logger.info(f"Camera opened with resolution {CAMERA_WIDTH} x {CAMERA_HEIGHT} and {FPS_VALUE} frames per second.")
+        awcr_logger.info(f"Camera opened with resolution {CAMERA_WIDTH} x {CAMERA_HEIGHT} and {FPS_VALUE} frames per second.")
 
         self.setup_main_layout_fields()
         self.update_frame()
@@ -325,7 +325,7 @@ class GuiHandler:
         Reads a frame from the camera, processes it, and updates the label with the new frame.
         """
         if not self.cap.isOpened():
-            logger.error("Camera is not opened!")
+            awcr_logger.error("Camera is not opened!")
             return
 
         ret, frame = self.cap.read()
@@ -505,7 +505,7 @@ class GuiHandler:
                    Date: 2025-06-12
         """)
         messagebox.showinfo("AWCR System info", info)
-        logger.debug("Program info displayed.")
+        awcr_logger.debug("Program info displayed.")
 
 
     def quit_program(self) -> None:
@@ -518,7 +518,7 @@ class GuiHandler:
             self.window.destroy()
             cv2.destroyAllWindows()
 
-            logger.debug("Closed the application.")
+            awcr_logger.debug("Closed the application.")
 
 
     @staticmethod
@@ -540,7 +540,7 @@ class GuiHandler:
             "Export Completed",
             f"Detection data for period '{period}' has been exported successfully!"
         )
-        logger.info("Exporting detection data to CSV.")
+        awcr_logger.info("Exporting detection data to CSV.")
 
 
     def set_window_common_parts(self, window_name: str) -> None:

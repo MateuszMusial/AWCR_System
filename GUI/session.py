@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 import logger
 
-logger = logger.get_logger("password_utils logger")
+awcr_logger = logger.get_logger("password_utils logger")
 
 
 @dataclass
@@ -25,4 +25,4 @@ class Session:
         if not email or "@" not in email:
             raise ValueError(f"Invalid email address: {email}")
         self.email_address = email
-        logger.info(f"Assigning email '{email}' to the session.")
+        awcr_logger.info(f"Assigning email '{email}' to the session.")

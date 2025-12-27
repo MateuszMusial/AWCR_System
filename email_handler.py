@@ -4,9 +4,10 @@ from email.message import EmailMessage
 
 from Utils.password_utils import get_password_from_file
 
-logger = logger.get_logger("email logger")
+awcr_logger = logger.get_logger("email logger")
 
 AWCR_SYSTEM_EMAIL = 'systemawcr@gmail.com'
+# TODO: Change to ENV variable or secure vault in production
 PASSWORD = get_password_from_file()
 
 
@@ -41,14 +42,14 @@ class EmailHandler:
         msg.set_content(body)
 
         try:
-            with smtplib.SMTP(self.host, port=587) as connection:
+            with smtplib.SMTP(self.host, port=self.port) as connection:
                 connection.starttls()
                 connection.login(user=AWCR_SYSTEM_EMAIL, password=PASSWORD)
                 connection.send_message(msg)
         except smtplib.SMTPException as e:
-            logger.error(f"Failed to send email: {e}")
+            awcr_logger.error(f"Failed to send email: {e}")
 
-        logger.info(f"Sending detection email to {self.logged_user}")
+        awcr_logger.info(f"Sending detection email to {self.logged_user}")
 
     def send_user_registered_information_email(self) -> None:
         """
@@ -93,13 +94,13 @@ class EmailHandler:
                         cid='awcrLogo'
                     )
             except FileNotFoundError:
-                logger.error(f"Logo image not found at {image_path}")
+                awcr_logger.error(f"Logo image not found at {image_path}")
 
         try:
-            with smtplib.SMTP(self.host, port=587) as connection:
+            with smtplib.SMTP(self.host, port=self.port) as connection:
                 connection.starttls()
                 connection.login(user=AWCR_SYSTEM_EMAIL, password=PASSWORD)
                 connection.send_message(msg)
-                logger.info(f"Sending registration email to {self.logged_user}")
+                awcr_logger.info(f"Sending registration email to {self.logged_user}")
         except smtplib.SMTPException as e:
-            logger.error(f"Failed to send email: {e}")
+            awcr_logger.error(f"Failed to send email: {e}")

@@ -3,7 +3,7 @@ import bcrypt
 import logger
 from typing import Any
 
-logger = logger.get_logger("password_utils logger")
+awcr_logger = logger.get_logger("password_utils logger")
 
 
 def hash_password(password: str) -> str:
@@ -65,5 +65,5 @@ def get_password_from_file(path: str = "secret.txt") -> str:
         with open(path, "r", encoding="utf-8") as f:
             return f.read().strip()
     except FileNotFoundError:
-        logger.error(f"Cannot find'{path}'file.")
+        awcr_logger.error(f"Cannot find'{path}'file.")
         raise RuntimeError(f"Cannot find'{path}'file.")

@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from logger import get_logger
 from Utils.password_utils import check_password, hash_password
 
-logger = get_logger()
+awcr_logger = get_logger()
 
 
 class DBHandler:
@@ -36,9 +36,9 @@ class DBHandler:
                 cursor.execute("INSERT INTO Users (email, password) VALUES (?, ?)",
                                 (email, hashed_password))
                 connection.commit()
-                logger.info(f"User {email} successfully registered to AWCR System!")
+                awcr_logger.info(f"User {email} successfully registered to AWCR System!")
         except sqlite3.IntegrityError:
-            logger.error("User already exist in the AWCR System!")
+            awcr_logger.error("User already exist in the AWCR System!")
             return False, "User already exist in the AWCR System!"
 
         return True, f"User {email} successfully registered to AWCR System!"
@@ -57,7 +57,7 @@ class DBHandler:
             case "Last year":
                 days_ago = now - timedelta(days=365)
             case _:
-                logger.error("Unrecognized time period!")
+                awcr_logger.error("Unrecognized time period!")
                 return []
 
         timestamp_str = days_ago.strftime('%Y-%m-%d %H:%M:%S')
@@ -88,4 +88,4 @@ class DBHandler:
             cursor.execute("INSERT INTO Detections (license_plate, timestamp) VALUES (?, datetime('now'))",
                            (licence_plate,))
             connection.commit()
-            logger.info(f"Added detection of car with licence plate {licence_plate} to the database.")
+            awcr_logger.info(f"Added detection of car with licence plate {licence_plate} to the database.")

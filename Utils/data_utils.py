@@ -3,7 +3,7 @@ from enum import Enum
 import pandas as pd
 import logger
 
-logger = logger.get_logger("Data utils logger")
+awcr_logger = logger.get_logger("Data utils logger")
 
 WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
@@ -40,17 +40,17 @@ def prepare_detection_data_for_plot(data: list[tuple], period: str) -> dict[str,
     Returns:
         dict: Keys as labels (e.g., days/months), values as counts.
     """
-    logger.debug(f"Processing detection data for period: {period}")
+    awcr_logger.debug(f"Processing detection data for period: {period}")
 
     if not data:
-        logger.error("No detection data provided.")
+        awcr_logger.error("No detection data provided.")
         return {}
 
     try:
         df = pd.DataFrame(data, columns=['id', 'license_plate', 'detection_time', 'car_id'])
         df['detection_time'] = pd.to_datetime(df['detection_time'])
     except (ValueError, KeyError) as e:
-        logger.error(f"Failed to parse detection data: {e}")
+        awcr_logger.error(f"Failed to parse detection data: {e}")
         return {}
 
     now = datetime.now()
@@ -82,7 +82,7 @@ def prepare_detection_data_for_plot(data: list[tuple], period: str) -> dict[str,
             result = {month: counts.get(month, 0) for month in MONTHS}
 
         case _:
-            logger.error(f"Unknown period: {period}")
+            awcr_logger.error(f"Unknown period: {period}")
             return {}
     return result
 
@@ -94,7 +94,7 @@ def export_detection_data_to_csv(data: list[tuple]) -> None:
         data: Detection data from the database.
     """
     if not data:
-        logger.error("No detection data to export.")
+        awcr_logger.error("No detection data to export.")
         return
 
     try:
@@ -103,6 +103,6 @@ def export_detection_data_to_csv(data: list[tuple]) -> None:
 
         filename = f"detections_{datetime.now().strftime('%Y-%m-%d_%H_%M_%S')}.csv"
         df.to_csv(filename, index=False)
-        logger.info(f"Detection data exported to {filename}")
+        awcr_logger.info(f"Detection data exported to {filename}")
     except (ValueError, IOError) as e:
-        logger.error(f"Failed to export detection data: {e}")
+        awcr_logger.error(f"Failed to export detection data: {e}")

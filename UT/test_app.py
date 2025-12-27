@@ -36,7 +36,7 @@ def test_create_window(gui_handler: GuiHandler, mocker: MockerFixture) -> None:
     Test the create_window method of GuiHandler.
     """
     # Arrange
-    logger_mock = mocker.patch('GUI.app.logger.debug')
+    logger_mock = mocker.patch('GUI.app.awcr_logger.debug')
     # Act
     gui_handler.create_window("Test_window_name")
 
