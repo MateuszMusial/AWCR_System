@@ -224,8 +224,7 @@ Database: The system requires an SQL database file named ```awcr_database```.
 
 You can create this file by importing the schema located in ```Database/schema.sql```.
 
-Secrets: Create a file named ```secret.txt``` in the root directory.
-This file must contain the database password required for the connection.
+In ```.env``` file replace placeholders with your password.
 
 <br />
 
