@@ -57,13 +57,3 @@ def validate_password_strength(password_to_validate: str) -> tuple[bool, Any] | 
         return False, "Weak password! Please use number, small and capital letter and special character."
 
 
-def get_password_from_file(path: str = "secret.txt") -> str:
-    """
-    Function to read password from file.
-    """
-    try:
-        with open(path, "r", encoding="utf-8") as f:
-            return f.read().strip()
-    except FileNotFoundError:
-        awcr_logger.error(f"Cannot find'{path}'file.")
-        raise RuntimeError(f"Cannot find'{path}'file.")

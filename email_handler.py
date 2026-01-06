@@ -1,14 +1,15 @@
+import os
 import smtplib
 import logger
 from email.message import EmailMessage
+from dotenv import load_dotenv
 
-from Utils.password_utils import get_password_from_file
 
 awcr_logger = logger.get_logger("email logger")
+load_dotenv()
 
 AWCR_SYSTEM_EMAIL = 'systemawcr@gmail.com'
-# TODO: Change to ENV variable or secure vault in production
-PASSWORD = get_password_from_file()
+PASSWORD = os.getenv('AWCR_SYSTEM_EMAIL_PASSWORD')
 
 
 class EmailHandler:
