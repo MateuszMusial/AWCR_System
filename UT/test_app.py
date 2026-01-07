@@ -36,11 +36,21 @@ def test_create_window(gui_handler: GuiHandler, mocker: MockerFixture) -> None:
     Test the create_window method of GuiHandler.
     """
     # Arrange
+    mock_tk_instance = MagicMock()
+    mock_tk_instance.title.return_value = "Test_window_name"
+
+    mocker_tk = mocker.patch('GUI.app.Tk', return_value=mock_tk_instance)
+    mocker.patch('GUI.app.Style')
     logger_mock = mocker.patch('GUI.app.awcr_logger.debug')
+
     # Act
     gui_handler.create_window("Test_window_name")
 
     # Assert
     assert gui_handler.window is not None
-    assert gui_handler.window.title() == "Test_window_name"
+    mocker_tk.assert_called_once()
+    gui_handler.window.title.assert_has_calls([
+        mocker.call("Test_window_name"),
+        mocker.call()
+    ])
     logger_mock.assert_called_once_with('Created Test_window_name window successfully!')
