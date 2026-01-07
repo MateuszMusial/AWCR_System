@@ -228,8 +228,6 @@ In ```.env``` file replace placeholders with your password.
 
 <br />
 
-##### 2. Running the System
-Execute the main application file to launch the Graphical User Interface (GUI):
 
 ```bash
 python main.py
