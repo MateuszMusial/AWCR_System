@@ -5,7 +5,7 @@ from Utils.common import display_detection_info
 
 
 @patch("Utils.common.messagebox.showwarning")
-@patch("Utils.common.logger.info")
+@patch("Utils.common.awcr_logger.info")
 def test_displays_message_box_with_correct_info(mock_logger_info, mock_messagebox):
     brand = "Toyota"
     model = "Corolla"
