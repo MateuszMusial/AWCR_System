@@ -1,7 +1,6 @@
 import bcrypt
 
 import logger
-from typing import Any
 
 awcr_logger = logger.get_logger("password_utils logger")
 
@@ -27,7 +26,7 @@ def check_password(password: str, hashed_password: str) -> bool:
     return bcrypt.checkpw(password.encode(), hashed_password.encode())
 
 
-def validate_password_strength(password_to_validate: str) -> tuple[bool, Any] | tuple[bool, str]:
+def validate_password_strength(password_to_validate: str) -> tuple[bool, None] | tuple[bool, str]:
     """
     Function to check if password meets the minimum requirements.
     """
