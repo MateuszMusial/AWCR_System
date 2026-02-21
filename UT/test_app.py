@@ -6,7 +6,6 @@ from GUI.app import GuiHandler
 from email_handler import EmailHandler
 
 
-
 @pytest.fixture()
 def gui_handler() -> GuiHandler:
     """Fixture to create a GuiHandler instance."""

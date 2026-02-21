@@ -18,7 +18,6 @@ class EmailHandler:
         self.host = "smtp.gmail.com"
         self.port = 587
 
-
     def set_logged_user(self, user_email: str) -> None:
         """
         Set the email address of the logged user.
@@ -26,7 +25,6 @@ class EmailHandler:
             user_email (str): The email address of the logged user.
         """
         self.logged_user = user_email
-
 
     def send_detected_car_information_email(self, *, brand: str, model: str, licence_plate: str) -> None:
         """

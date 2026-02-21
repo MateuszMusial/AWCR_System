@@ -54,5 +54,3 @@ def validate_password_strength(password_to_validate: str) -> tuple[bool, None] |
         return True, None
     else:
         return False, "Weak password! Please use number, small and capital letter and special character."
-
-

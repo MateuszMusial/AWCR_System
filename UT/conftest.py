@@ -1,6 +1,5 @@
 import sys
 from unittest.mock import MagicMock
-import pytest
 
 # --- Global mocking setup ---
 # List of modules to mock

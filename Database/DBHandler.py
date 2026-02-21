@@ -17,7 +17,7 @@ class DBHandler:
         """
         with sqlite3.connect(self.db_name) as connection:
             cursor = connection.cursor()
-            cursor.execute("SELECT password FROM Users WHERE email = (?) ", (user_email, ))
+            cursor.execute("SELECT password FROM Users WHERE email = (?) ", (user_email,))
             result = cursor.fetchone()
 
         if result:
@@ -34,7 +34,7 @@ class DBHandler:
             with sqlite3.connect(self.db_name) as connection:
                 cursor = connection.cursor()
                 cursor.execute("INSERT INTO Users (email, password) VALUES (?, ?)",
-                                (email, hashed_password))
+                               (email, hashed_password))
                 connection.commit()
                 awcr_logger.info(f"User {email} successfully registered to AWCR System!")
         except sqlite3.IntegrityError:

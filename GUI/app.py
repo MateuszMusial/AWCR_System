@@ -46,7 +46,6 @@ class GuiHandler:
         self.last_detections = []
         self.email_worker = email_worker
 
-
     def create_window(self, name: str) -> Tk | None:
         """
         Creates a new Tkinter window with the given name.
@@ -279,7 +278,9 @@ class GuiHandler:
         self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, CAMERA_WIDTH)
         self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, CAMERA_HEIGHT)
         self.cap.set(cv2.CAP_PROP_FPS, FPS_VALUE)
-        awcr_logger.info(f"Camera opened with resolution {CAMERA_WIDTH} x {CAMERA_HEIGHT} and {FPS_VALUE} frames per second.")
+        awcr_logger.info(
+            f"Camera opened with resolution {CAMERA_WIDTH} x {CAMERA_HEIGHT} and {FPS_VALUE} frames per second."
+        )
 
         self.setup_main_layout_fields()
         self.update_frame()
@@ -371,7 +372,7 @@ class GuiHandler:
                     cv2.putText(frame, label, (x1, y1 - 10),
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 0, 0), 2)
 
-            image = Image.fromarray(frame) # costly operation
+            image = Image.fromarray(frame)
             self.camera_frame = ImageTk.PhotoImage(image=image)
             self.camera_label.config(image=self.camera_frame)
             self.camera_label.image = self.camera_frame
@@ -504,7 +505,6 @@ class GuiHandler:
         messagebox.showinfo("AWCR System info", info)
         awcr_logger.debug("Program info displayed.")
 
-
     def quit_program(self) -> None:
         """
         Quits the program.
@@ -517,14 +517,12 @@ class GuiHandler:
 
             awcr_logger.debug("Closed the application.")
 
-
     @staticmethod
     def check_detected_car_is_wanted(final_result: str) -> tuple[bool, tuple]:
         """
         Check if the detected car is wanted by fetching data from the database.
         """
         return db_handler.check_detected_car_in_database(final_result)
-
 
     def export_data_to_csv(self):
         """
@@ -539,7 +537,6 @@ class GuiHandler:
         )
         awcr_logger.info("Exporting detection data to CSV.")
 
-
     def set_window_common_parts(self, window_name: str) -> None:
         """
         Sets common parts of the window such as icon and geometry.
@@ -550,7 +547,6 @@ class GuiHandler:
         self.window.iconphoto(True, self.icon)
         self.window.columnconfigure(0, weight=1)
         self.window.columnconfigure(1, weight=1)
-
 
     def setup_tool_frame(self) -> tkinter.Frame:
         """
@@ -565,7 +561,6 @@ class GuiHandler:
             background='#3E4149'
         ).pack(padx=5, pady=5)
         return tools_frame
-
 
     def _handle_detected_car(self, details: tuple) -> None:
         """
