@@ -27,7 +27,6 @@ from Utils.data_utils import preprocess_detection_data, prepare_detection_data_f
 
 awcr_logger = logger.get_logger("GUI logger")
 db_handler = DBHandler()
-email_handler = None
 
 YOLO_MODEL = "awcr_system_best_model.pt"
 CAMERA_WIDTH = 900
@@ -41,10 +40,11 @@ class GuiHandler:
     This class handles the GUI for the AWCR System.
     It creates the main window, login and register forms, statistics and the camera view.
     """
-    def __init__(self):
+    def __init__(self, email_worker: EmailHandler):
         self.window = None
         self.frame_counter = 0
         self.last_detections = []
+        self.email_worker = email_worker
 
 
     def create_window(self, name: str) -> Tk | None:
@@ -189,13 +189,12 @@ class GuiHandler:
         """
         Logs in the user if the email and password are correct.
         """
-        global email_handler
         email = self.email_entry.get()
         password = self.password_entry.get()
 
         if db_handler.user_login(email, password):
-            email_handler = EmailHandler(email)
             session.assign_current_user(email)
+            self.email_worker.set_logged_user(email)
             self.setup_main_layout()
             awcr_logger.debug(f"User {email} logged successfully!")
         else:
@@ -221,7 +220,6 @@ class GuiHandler:
         """
         Registers a new user in the system.
         """
-        global email_handler
 
         email = self.register_email_entry.get()
         password = self.register_password_entry.get()
@@ -237,9 +235,8 @@ class GuiHandler:
             if result:
                 messagebox.showinfo("Success!", message)
                 awcr_logger.info(f"User {email} registered successfully!")
-                email_handler = EmailHandler(email)
 
-                Thread(target=email_handler.send_user_registered_information_email, daemon=True).start()
+                Thread(target=self.email_worker.send_user_registered_information_email, daemon=True).start()
                 self.window.destroy()
                 self.create_window("Login")
                 self.setup_login_window()
@@ -358,7 +355,7 @@ class GuiHandler:
                             car_is_wanted, details = self.check_detected_car_is_wanted(final_result)
                             if car_is_wanted:
                                 Thread(
-                                    target=_handle_detected_car,
+                                    target=self._handle_detected_car,
                                     args=(details,),
                                     daemon=True
                                 ).start()
@@ -570,26 +567,25 @@ class GuiHandler:
         return tools_frame
 
 
-def _handle_detected_car(details: tuple) -> None:
+    def _handle_detected_car(self, details: tuple) -> None:
+        """
+        Orchestrates the sequence of actions for a detected wanted vehicle.
+
+        This method unpacks the vehicle details, records the detection in the database,
+        updates the user interface, and sends an email notification.
+
+        Args:
+            details (tuple | None): A tuple containing vehicle specifications in the following order:
+                (id, license_plate, brand, model, owner_id).
+                If None, no actions are performed.
     """
-    Orchestrates the sequence of actions for a detected wanted vehicle.
+        if details is not None:
+            _, licence_plate, brand, model, _ = details
 
-    This method unpacks the vehicle details, records the detection in the database,
-    updates the user interface, and sends an email notification.
-
-    Args:
-        details (tuple | None): A tuple containing vehicle specifications in the following order:
-            (id, license_plate, brand, model, owner_id).
-            If None, no actions are performed.
-"""
-    if details is not None:
-        _, licence_plate, brand, model, _ = details
-
-        db_handler.add_detection(licence_plate)
-        display_detection_info(brand, model, licence_plate)
-        email_handler.send_detected_car_information_email(
-            brand=brand,
-            model=model,
-            licence_plate=licence_plate
-        )
-
+            db_handler.add_detection(licence_plate)
+            display_detection_info(brand, model, licence_plate)
+            self.email_worker.send_detected_car_information_email(
+                brand=brand,
+                model=model,
+                licence_plate=licence_plate
+            )

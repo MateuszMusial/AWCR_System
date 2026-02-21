@@ -3,13 +3,14 @@ from pytest_mock import MockerFixture
 from unittest.mock import MagicMock
 
 from GUI.app import GuiHandler
+from email_handler import EmailHandler
 
 
 
 @pytest.fixture()
 def gui_handler() -> GuiHandler:
     """Fixture to create a GuiHandler instance."""
-    return GuiHandler()
+    return GuiHandler(EmailHandler())
 
 
 def test_set_window_common_parts(gui_handler: GuiHandler, mocker: MockerFixture) -> None:

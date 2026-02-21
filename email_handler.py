@@ -13,10 +13,20 @@ PASSWORD = os.getenv('AWCR_SYSTEM_EMAIL_PASSWORD')
 
 
 class EmailHandler:
-    def __init__(self, user: str):
-        self.logged_user = user
+    def __init__(self):
+        self.logged_user = None
         self.host = "smtp.gmail.com"
         self.port = 587
+
+
+    def set_logged_user(self, user_email: str) -> None:
+        """
+        Set the email address of the logged user.
+        Args:
+            user_email (str): The email address of the logged user.
+        """
+        self.logged_user = user_email
+
 
     def send_detected_car_information_email(self, *, brand: str, model: str, licence_plate: str) -> None:
         """
