@@ -1,6 +1,7 @@
+from unittest.mock import MagicMock
+
 import pytest
 from pytest_mock import MockerFixture
-from unittest.mock import MagicMock
 
 from GUI.app import GuiHandler
 from email_handler import EmailHandler

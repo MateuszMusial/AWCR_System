@@ -35,3 +35,9 @@ def test_handles_messagebox_error_gracefully(mock_logger_info, mock_messagebox):
     mock_logger_info.assert_called_once_with(
         "Detected wanted car Ford Focus with XYZ789 licence plate!"
     )
+
+    mock_messagebox.assert_called_once_with(
+        "Wanted car detected!\n",
+        "Detected wanted car Ford Focus\n"
+        "with XYZ789 licence plate!"
+    )

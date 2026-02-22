@@ -220,9 +220,12 @@ pip install -r requirements.txt
 #### D. Database & Configuration
 ### Before launching the system, ensure the following files are present in the root directory:
 
-Database: The system requires an SQL database file named ```awcr_database```.
+Database: The system requires an SQLite database file named ```awcr_database```.
 
-You can create this file by importing the schema located in ```Database/schema.sql```.
+You can create and initialize this database with sample data by running the `init_db.py` script:
+```bash
+python init_db.py
+```
 
 In ```.env``` file replace placeholders with your password.
 
