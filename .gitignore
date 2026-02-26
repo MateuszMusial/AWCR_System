@@ -9,7 +9,12 @@ Logs/
 
 # sensitive info
 secret.txt
+.env
 
 #cache
 .pytest_cache
 .mypy_cache
+__pycache__/
+.coverage
+Database/__pycache__/
+UT/__pycache__/
