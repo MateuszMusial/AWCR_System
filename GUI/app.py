@@ -26,7 +26,6 @@ from Utils.data_utils import preprocess_detection_data, prepare_detection_data_f
 
 
 awcr_logger = logger.get_logger("GUI logger")
-db_handler = DBHandler()
 
 YOLO_MODEL = "awcr_system_best_model.pt"
 CAMERA_WIDTH = 900
@@ -40,11 +39,12 @@ class GuiHandler:
     This class handles the GUI for the AWCR System.
     It creates the main window, login and register forms, statistics and the camera view.
     """
-    def __init__(self, email_worker: EmailHandler):
+    def __init__(self, email_worker: EmailHandler, db_handler: DBHandler):
         self.window = None
         self.frame_counter = 0
         self.last_detections = []
         self.email_worker = email_worker
+        self.db_handler = db_handler
 
     def create_window(self, name: str) -> Tk | None:
         """
@@ -191,7 +191,7 @@ class GuiHandler:
         email = self.email_entry.get()
         password = self.password_entry.get()
 
-        if db_handler.user_login(email, password):
+        if self.db_handler.user_login(email, password):
             session.assign_current_user(email)
             self.email_worker.set_logged_user(email)
             self.setup_main_layout()
@@ -230,7 +230,7 @@ class GuiHandler:
             return
 
         if self.is_password_and_confirmed_password_the_same():
-            result, message = db_handler.add_user(email, password)
+            result, message = self.db_handler.add_user(email, password)
             if result:
                 messagebox.showinfo("Success!", message)
                 awcr_logger.info(f"User {email} registered successfully!")
@@ -466,7 +466,7 @@ class GuiHandler:
         self.ax.clear()
 
         period = self.period_var.get()
-        detections = db_handler.fetch_detections_data(period)
+        detections = self.db_handler.fetch_detections_data(period)
         result = prepare_detection_data_for_plot(detections, period)
         self.ax.clear()
 
@@ -517,19 +517,18 @@ class GuiHandler:
 
             awcr_logger.debug("Closed the application.")
 
-    @staticmethod
-    def check_detected_car_is_wanted(final_result: str) -> tuple[bool, tuple]:
+    def check_detected_car_is_wanted(self, final_result: str) -> tuple[bool, tuple]:
         """
         Check if the detected car is wanted by fetching data from the database.
         """
-        return db_handler.check_detected_car_in_database(final_result)
+        return self.db_handler.check_detected_car_in_database(final_result)
 
     def export_data_to_csv(self):
         """
         Exports the detection data to a CSV file based on the selected period.
         """
         period = self.period_var.get()
-        detections = db_handler.fetch_detections_data(period)
+        detections = self.db_handler.fetch_detections_data(period)
         export_detection_data_to_csv(detections)
         messagebox.showinfo(
             "Export Completed",
@@ -577,7 +576,7 @@ class GuiHandler:
         if details is not None:
             _, licence_plate, brand, model, _ = details
 
-            db_handler.add_detection(licence_plate)
+            self.db_handler.add_detection(licence_plate)
             display_detection_info(brand, model, licence_plate)
             self.email_worker.send_detected_car_information_email(
                 brand=brand,
