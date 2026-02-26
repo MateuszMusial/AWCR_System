@@ -85,7 +85,11 @@ class DBHandler:
         """
         with sqlite3.connect(self.db_name) as connection:
             cursor = connection.cursor()
-            cursor.execute("INSERT INTO Detections (license_plate, timestamp) VALUES (?, datetime('now'))",
-                           (licence_plate,))
+            cursor.execute("SELECT id FROM Cars WHERE license_plate = (?)", (licence_plate,))
+            car_id_result = cursor.fetchone()
+            car_id = car_id_result[0] if car_id_result else None
+
+            cursor.execute("INSERT INTO Detections (license_plate, timestamp, car_id) VALUES (?, datetime('now'), ?)",
+                           (licence_plate, car_id))
             connection.commit()
             awcr_logger.info(f"Added detection of car with licence plate {licence_plate} to the database.")
