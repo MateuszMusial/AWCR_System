@@ -56,3 +56,38 @@ def test_create_window(gui_handler: GuiHandler, mocker: MockerFixture) -> None:
         mocker.call()
     ])
     logger_mock.assert_called_once_with('Created Test_window_name window successfully!')
+
+
+def test_is_alert_on_cooldown(gui_handler: GuiHandler, mocker: MockerFixture) -> None:
+    """
+    Test whether repeated alerts for the same licence plate are suppressed
+    during the cooldown period and allowed again after it expires.
+    """
+    # Arrange
+    mocker.patch('GUI.app.time.monotonic', side_effect=[0.0, 30.0, 100.0])
+
+    # Act
+    first_alert = gui_handler._is_alert_on_cooldown("WA2137PL")
+    second_alert = gui_handler._is_alert_on_cooldown("WA2137PL")
+    third_alert = gui_handler._is_alert_on_cooldown("WA2137PL")
+
+    # Assert
+    assert first_alert is False
+    assert second_alert is True
+    assert third_alert is False
+
+
+def test_is_alert_on_cooldown_independent_plates(gui_handler: GuiHandler, mocker: MockerFixture) -> None:
+    """
+    Test whether the cooldown of one licence plate does not affect another plate.
+    """
+    # Arrange
+    mocker.patch('GUI.app.time.monotonic', side_effect=[0.0, 10.0])
+
+    # Act
+    first_plate_alert = gui_handler._is_alert_on_cooldown("WA2137PL")
+    second_plate_alert = gui_handler._is_alert_on_cooldown("KR12345")
+
+    # Assert
+    assert first_plate_alert is False
+    assert second_plate_alert is False

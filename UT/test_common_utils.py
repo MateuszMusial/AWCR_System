@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import patch
 
-from Utils.common import display_detection_info
+from Utils.common import display_detection_info, is_valid_email
 
 
 @patch("Utils.common.messagebox.showwarning")
@@ -41,3 +41,56 @@ def test_handles_messagebox_error_gracefully(mock_logger_info, mock_messagebox):
         "Detected wanted car Ford Focus\n"
         "with XYZ789 licence plate!"
     )
+
+
+@pytest.mark.parametrize(
+    "email, expected_result",
+    [
+        pytest.param(
+            "user@example.com",
+            True,
+            id="Valid email"
+        ),
+        pytest.param(
+            "first.last+tag@sub.domain.org",
+            True,
+            id="Valid email with dots and plus"
+        ),
+        pytest.param(
+            "",
+            False,
+            id="Empty email"
+        ),
+        pytest.param(
+            "no-at-sign.com",
+            False,
+            id="Missing @ character"
+        ),
+        pytest.param(
+            "user@domain",
+            False,
+            id="Missing top level domain"
+        ),
+        pytest.param(
+            "user name@example.com",
+            False,
+            id="Whitespace in email"
+        ),
+        pytest.param(
+            "user@@example.com",
+            False,
+            id="Double @ character"
+        )
+    ]
+)
+def test_is_valid_email(email: str, expected_result: bool) -> None:
+    """
+    Test whether email format validation behaves correctly.
+    """
+    # Arrange
+    # Act
+    result = is_valid_email(email)
+
+    # Assert
+    assert isinstance(result, bool)
+    assert result is expected_result

@@ -9,8 +9,8 @@ awcr_logger = get_logger(__name__)
 
 
 class DBHandler:
-    def __init__(self):
-        self.db_name = "awcr_database"
+    def __init__(self, db_name: str = "awcr_database"):
+        self.db_name = db_name
 
     def user_login(self, user_email: str, user_password: str) -> bool:
         """
