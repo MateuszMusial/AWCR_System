@@ -1,10 +1,11 @@
 import sqlite3
+from contextlib import closing
 from datetime import datetime, timedelta
 
 from logger import get_logger
 from Utils.password_utils import check_password, hash_password
 
-awcr_logger = get_logger()
+awcr_logger = get_logger(__name__)
 
 
 class DBHandler:
@@ -15,9 +16,9 @@ class DBHandler:
         """
         Check if user is in the database and password is correct.
         """
-        with sqlite3.connect(self.db_name) as connection:
+        with closing(sqlite3.connect(self.db_name)) as connection:
             cursor = connection.cursor()
-            cursor.execute("SELECT password FROM Users WHERE email = (?) ", (user_email,))
+            cursor.execute("SELECT password FROM Users WHERE email = ?", (user_email,))
             result = cursor.fetchone()
 
         if result:
@@ -31,15 +32,15 @@ class DBHandler:
         hashed_password = hash_password(password)
 
         try:
-            with sqlite3.connect(self.db_name) as connection:
+            with closing(sqlite3.connect(self.db_name)) as connection:
                 cursor = connection.cursor()
                 cursor.execute("INSERT INTO Users (email, password) VALUES (?, ?)",
                                (email, hashed_password))
                 connection.commit()
                 awcr_logger.info(f"User {email} successfully registered to AWCR System!")
         except sqlite3.IntegrityError:
-            awcr_logger.error("User already exist in the AWCR System!")
-            return False, "User already exist in the AWCR System!"
+            awcr_logger.error("User already exists in the AWCR System!")
+            return False, "User already exists in the AWCR System!"
 
         return True, f"User {email} successfully registered to AWCR System!"
 
@@ -49,20 +50,20 @@ class DBHandler:
 
         match period:
             case "Today":
-                days_ago = now - timedelta(days=1)
+                since = now.replace(hour=0, minute=0, second=0, microsecond=0)
             case "Last week":
-                days_ago = now - timedelta(days=7)
+                since = now - timedelta(days=7)
             case "Last month":
-                days_ago = now - timedelta(days=30)
+                since = now - timedelta(days=30)
             case "Last year":
-                days_ago = now - timedelta(days=365)
+                since = now - timedelta(days=365)
             case _:
                 awcr_logger.error("Unrecognized time period!")
                 return []
 
-        timestamp_str = days_ago.strftime('%Y-%m-%d %H:%M:%S')
+        timestamp_str = since.strftime('%Y-%m-%d %H:%M:%S')
 
-        with sqlite3.connect(self.db_name) as connection:
+        with closing(sqlite3.connect(self.db_name)) as connection:
             cursor = connection.cursor()
             cursor.execute("SELECT * FROM Detections WHERE timestamp >= ?", (timestamp_str,))
             return cursor.fetchall()
@@ -71,9 +72,9 @@ class DBHandler:
         """
         Check if the detected car is already in the database.
         """
-        with sqlite3.connect(self.db_name) as connection:
+        with closing(sqlite3.connect(self.db_name)) as connection:
             cursor = connection.cursor()
-            cursor.execute("SELECT * FROM Cars WHERE license_plate = (?)", (final_result,))
+            cursor.execute("SELECT * FROM Cars WHERE license_plate = ?", (final_result,))
             result = cursor.fetchone()
             if result:
                 return True, result
@@ -83,13 +84,15 @@ class DBHandler:
         """
         Add detection to the database.
         """
-        with sqlite3.connect(self.db_name) as connection:
+        with closing(sqlite3.connect(self.db_name)) as connection:
             cursor = connection.cursor()
-            cursor.execute("SELECT id FROM Cars WHERE license_plate = (?)", (licence_plate,))
+            cursor.execute("SELECT id FROM Cars WHERE license_plate = ?", (licence_plate,))
             car_id_result = cursor.fetchone()
             car_id = car_id_result[0] if car_id_result else None
 
-            cursor.execute("INSERT INTO Detections (license_plate, timestamp, car_id) VALUES (?, datetime('now'), ?)",
-                           (licence_plate, car_id))
+            cursor.execute(
+                "INSERT INTO Detections (license_plate, timestamp, car_id) "
+                "VALUES (?, datetime('now', 'localtime'), ?)",
+                (licence_plate, car_id))
             connection.commit()
             awcr_logger.info(f"Added detection of car with licence plate {licence_plate} to the database.")

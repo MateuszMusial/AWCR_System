@@ -1,3 +1,5 @@
+import sys
+import time
 from textwrap import dedent
 
 import cv2
@@ -16,7 +18,7 @@ from ttkbootstrap import Style
 from PIL import Image, ImageTk
 
 from Database.DBHandler import DBHandler
-from Utils.common import display_detection_info
+from Utils.common import display_detection_info, is_valid_email
 from email_handler import EmailHandler
 import logger
 from GUI.session import Session
@@ -25,12 +27,14 @@ from Utils.password_utils import validate_password_strength
 from Utils.data_utils import preprocess_detection_data, prepare_detection_data_for_plot, export_detection_data_to_csv
 
 
-awcr_logger = logger.get_logger("GUI logger")
+awcr_logger = logger.get_logger(__name__)
 
 YOLO_MODEL = "awcr_system_best_model.pt"
 CAMERA_WIDTH = 900
 CAMERA_HEIGHT = 650
 FPS_VALUE = 25
+DETECTION_CONFIDENCE_THRESHOLD = 0.55
+ALERT_COOLDOWN_SECONDS = 60
 session = Session()
 
 
@@ -43,6 +47,7 @@ class GuiHandler:
         self.window = None
         self.frame_counter = 0
         self.last_detections = []
+        self.last_alert_times = {}
         self.email_worker = email_worker
         self.db_handler = db_handler
 
@@ -63,7 +68,7 @@ class GuiHandler:
 
     def setup_login_register_window(self) -> None:
         """
-        Set up the login or register window with all necessarily fields.
+        Set up the login or register window with all necessary fields.
         """
         self.set_window_common_parts('Login / Register')
 
@@ -106,7 +111,7 @@ class GuiHandler:
 
     def setup_login_window(self) -> None:
         """
-        Set up the login window with all necessarily fields.
+        Set up the login window with all necessary fields.
         """
         self.set_window_common_parts('Login')
 
@@ -141,7 +146,7 @@ class GuiHandler:
 
     def setup_register_window(self) -> None:
         """
-        Set up the register window with all necessarily fields.
+        Set up the register window with all necessary fields.
         """
         self.window.destroy()
 
@@ -198,7 +203,7 @@ class GuiHandler:
             awcr_logger.debug(f"User {email} logged successfully!")
         else:
             messagebox.showerror("Error!", "Invalid e-mail or password!")
-            awcr_logger.error(f"Invalid e-mail or password created for user: {email}")
+            awcr_logger.warning(f"Failed login attempt for email: {email}")
             self.clear_login_fields()
 
     def clear_login_fields(self) -> None:
@@ -222,6 +227,11 @@ class GuiHandler:
 
         email = self.register_email_entry.get()
         password = self.register_password_entry.get()
+
+        if not is_valid_email(email):
+            messagebox.showerror("Error!", "Invalid e-mail address!")
+            self.clear_register_fields()
+            return
 
         password_validated, error = validate_password_strength(password)
         if not password_validated:
@@ -266,7 +276,10 @@ class GuiHandler:
         self.window.geometry("1280x720")
         self.model = YOLO(YOLO_MODEL)
         self.reader = easyocr.Reader(["en"])
-        self.cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+        if sys.platform == "win32":
+            self.cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+        else:
+            self.cap = cv2.VideoCapture(0)
 
         if not self.cap.isOpened():
             messagebox.showerror("Error", "Can't open the camera!")
@@ -337,10 +350,10 @@ class GuiHandler:
 
                 for result in results:
                     for box in result.boxes:
-                        confidence = box.conf[0]
+                        confidence = float(box.conf[0])
                         class_id = int(box.cls[0])
 
-                        if class_id == 0 and confidence > 0.55:
+                        if class_id == 0 and confidence > DETECTION_CONFIDENCE_THRESHOLD:
                             x1, y1, x2, y2 = map(int, box.xyxy[0])
                             plate_roi = frame[y1:y2, x1:x2]
 
@@ -354,7 +367,7 @@ class GuiHandler:
                             current_detections.append(detection_data)
 
                             car_is_wanted, details = self.check_detected_car_is_wanted(final_result)
-                            if car_is_wanted:
+                            if car_is_wanted and not self._is_alert_on_cooldown(final_result):
                                 Thread(
                                     target=self._handle_detected_car,
                                     args=(details,),
@@ -368,7 +381,7 @@ class GuiHandler:
                     x1, y1, x2, y2 = detection.get("coordinates")
                     conf = detection.get("confidence")
                     cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
-                    label = f"License plate: {conf:.2f}%"
+                    label = f"License plate: {conf * 100:.1f}%"
                     cv2.putText(frame, label, (x1, y1 - 10),
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 0, 0), 2)
 
@@ -560,6 +573,25 @@ class GuiHandler:
             background='#3E4149'
         ).pack(padx=5, pady=5)
         return tools_frame
+
+    def _is_alert_on_cooldown(self, licence_plate: str) -> bool:
+        """
+        Checks whether an alert for the given licence plate was already raised recently.
+        Prevents flooding the user with popups and emails while the same car stays in frame.
+
+        Args:
+            licence_plate (str): The detected licence plate.
+
+        Returns:
+            bool: True if the alert should be suppressed, False if it may be raised.
+        """
+        now = time.monotonic()
+        last_alert = self.last_alert_times.get(licence_plate)
+        if last_alert is not None and now - last_alert < ALERT_COOLDOWN_SECONDS:
+            return True
+
+        self.last_alert_times[licence_plate] = now
+        return False
 
     def _handle_detected_car(self, details: tuple) -> None:
         """
