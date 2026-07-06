@@ -5,10 +5,8 @@ from textwrap import dedent
 import cv2
 import tkinter
 
-import easyocr
 import ttkbootstrap as ttk
 from tkinter import Tk, messagebox
-from ultralytics import YOLO
 
 from threading import Thread
 
@@ -22,18 +20,17 @@ from Utils.common import display_detection_info, is_valid_email
 from email_handler import EmailHandler
 import logger
 from GUI.session import Session
+from services.detection_service import DetectionService
 
 from Utils.password_utils import validate_password_strength
-from Utils.data_utils import preprocess_detection_data, prepare_detection_data_for_plot, export_detection_data_to_csv
+from Utils.data_utils import prepare_detection_data_for_plot, export_detection_data_to_csv
 
 
 awcr_logger = logger.get_logger(__name__)
 
-YOLO_MODEL = "awcr_system_best_model.pt"
 CAMERA_WIDTH = 900
 CAMERA_HEIGHT = 650
 FPS_VALUE = 25
-DETECTION_CONFIDENCE_THRESHOLD = 0.55
 ALERT_COOLDOWN_SECONDS = 60
 session = Session()
 
@@ -43,13 +40,14 @@ class GuiHandler:
     This class handles the GUI for the AWCR System.
     It creates the main window, login and register forms, statistics and the camera view.
     """
-    def __init__(self, email_worker: EmailHandler, db_handler: DBHandler):
+    def __init__(self, email_worker: EmailHandler, db_handler: DBHandler, detection_service: DetectionService):
         self.window = None
         self.frame_counter = 0
         self.last_detections = []
         self.last_alert_times = {}
         self.email_worker = email_worker
         self.db_handler = db_handler
+        self.detection_service = detection_service
 
     def create_window(self, name: str) -> Tk | None:
         """
@@ -274,8 +272,6 @@ class GuiHandler:
         self.window = tkinter.Tk()
         self.window.title("Camera Window")
         self.window.geometry("1280x720")
-        self.model = YOLO(YOLO_MODEL)
-        self.reader = easyocr.Reader(["en"])
         if sys.platform == "win32":
             self.cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
         else:
@@ -345,45 +341,23 @@ class GuiHandler:
             self.frame_counter += 1
 
             if self.frame_counter % 4 == 0:
-                current_detections = []
-                results = self.model(frame)
+                self.last_detections = self.detection_service.process_frame(frame)
 
-                for result in results:
-                    for box in result.boxes:
-                        confidence = float(box.conf[0])
-                        class_id = int(box.cls[0])
-
-                        if class_id == 0 and confidence > DETECTION_CONFIDENCE_THRESHOLD:
-                            x1, y1, x2, y2 = map(int, box.xyxy[0])
-                            plate_roi = frame[y1:y2, x1:x2]
-
-                            ocr_result = self.reader.readtext(plate_roi, detail=0)
-                            final_result = preprocess_detection_data(ocr_result)
-
-                            detection_data = {
-                                'coordinates': (x1, y1, x2, y2),
-                                'confidence': confidence
-                            }
-                            current_detections.append(detection_data)
-
-                            car_is_wanted, details = self.check_detected_car_is_wanted(final_result)
-                            if car_is_wanted and not self._is_alert_on_cooldown(final_result):
-                                Thread(
-                                    target=self._handle_detected_car,
-                                    args=(details,),
-                                    daemon=True
-                                ).start()
-
-                self.last_detections = current_detections
-
-            if self.last_detections:
                 for detection in self.last_detections:
-                    x1, y1, x2, y2 = detection.get("coordinates")
-                    conf = detection.get("confidence")
-                    cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
-                    label = f"License plate: {conf * 100:.1f}%"
-                    cv2.putText(frame, label, (x1, y1 - 10),
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 0, 0), 2)
+                    car_is_wanted, details = self.check_detected_car_is_wanted(detection.plate_text)
+                    if car_is_wanted and not self._is_alert_on_cooldown(detection.plate_text):
+                        Thread(
+                            target=self._handle_detected_car,
+                            args=(details,),
+                            daemon=True
+                        ).start()
+
+            for detection in self.last_detections:
+                x1, y1, x2, y2 = detection.box
+                cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
+                label = f"License plate: {detection.confidence * 100:.1f}%"
+                cv2.putText(frame, label, (x1, y1 - 10),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 0, 0), 2)
 
             image = Image.fromarray(frame)
             self.camera_frame = ImageTk.PhotoImage(image=image)
