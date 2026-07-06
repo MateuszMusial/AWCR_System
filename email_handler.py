@@ -5,7 +5,7 @@ from email.message import EmailMessage
 from dotenv import load_dotenv
 
 
-awcr_logger = logger.get_logger("email logger")
+awcr_logger = logger.get_logger(__name__)
 load_dotenv()
 
 AWCR_SYSTEM_EMAIL = 'systemawcr@gmail.com'
@@ -42,7 +42,7 @@ class EmailHandler:
 
         body = (
             "Detection Report:\n\n"
-            "Wanted car decetcted!\n"
+            "Wanted car detected!\n"
             f"Detected wanted car {brand} {model}\n"
             f"with {licence_plate} licence plate!\n\n"
             "Best regards,\n"
@@ -55,10 +55,9 @@ class EmailHandler:
                 connection.starttls()
                 connection.login(user=AWCR_SYSTEM_EMAIL, password=PASSWORD)
                 connection.send_message(msg)
+                awcr_logger.info(f"Detection email sent to {self.logged_user}")
         except smtplib.SMTPException as e:
             awcr_logger.error(f"Failed to send email: {e}")
-
-        awcr_logger.info(f"Sending detection email to {self.logged_user}")
 
     def send_user_registered_information_email(self) -> None:
         """
@@ -110,6 +109,6 @@ class EmailHandler:
                 connection.starttls()
                 connection.login(user=AWCR_SYSTEM_EMAIL, password=PASSWORD)
                 connection.send_message(msg)
-                awcr_logger.info(f"Sending registration email to {self.logged_user}")
+                awcr_logger.info(f"Registration email sent to {self.logged_user}")
         except smtplib.SMTPException as e:
             awcr_logger.error(f"Failed to send email: {e}")

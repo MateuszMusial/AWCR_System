@@ -181,7 +181,7 @@ Follow these steps to set up and run the **AWCR System** locally.
 
 ### Prerequisites
 
-* **Python:** Version 3.9 or higher (recommended).
+* **Python:** Version 3.10 or higher (the project uses `match`/`case` syntax).
 * **Git:** For cloning the repository.
 * **A camera source** (e.g., webcam or IP camera stream URL) if testing live detection.
 
@@ -193,8 +193,8 @@ Follow these steps to set up and run the **AWCR System** locally.
 Open your terminal or command prompt and run the following command to download the project files:
 
 ```bash
-git clone [https://github.com/YourUsername/AWCR-System.git](https://github.com/YourUsername/AWCR-System.git)
-cd AWCR-System
+git clone https://github.com/MateuszMusial/AWCR_System.git
+cd AWCR_System
 ```
 ---
 #### B. Set Up Virtual Environment (Recommended)
@@ -227,16 +227,19 @@ You can create and initialize this database with sample data by running the `ini
 python init_db.py
 ```
 
-In ```.env``` file replace placeholders with your password.
+Copy `.env.example` to `.env` and replace the placeholder with your email app password:
+```bash
+cp .env.example .env
+```
 
 <br />
 
-
+#### E. Run the Application
 ```bash
 python main.py
 ```
 
 <div align="center">
-  <sub>**AWCR System** is released under the **MIT License**.</sub>
-  
+  <sub>**AWCR System** is released under the **MIT License** — see the [LICENSE](LICENSE) file.</sub>
+
 </div>

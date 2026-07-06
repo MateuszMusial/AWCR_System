@@ -1,9 +1,25 @@
+import re
 from tkinter import messagebox
 
 import logger
 
 
-awcr_logger = logger.get_logger("Common utils logger")
+awcr_logger = logger.get_logger(__name__)
+
+EMAIL_PATTERN = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+
+
+def is_valid_email(email: str) -> bool:
+    """
+    Check if the given string looks like a valid email address.
+
+    Args:
+        email (str): The email address to validate.
+
+    Returns:
+        bool: True if the email has a valid format, False otherwise.
+    """
+    return bool(EMAIL_PATTERN.match(email))
 
 
 def display_detection_info(brand: str, model: str, licence_plate: str) -> None:

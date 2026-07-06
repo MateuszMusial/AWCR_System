@@ -2,7 +2,7 @@ import bcrypt
 
 import logger
 
-awcr_logger = logger.get_logger("password_utils logger")
+awcr_logger = logger.get_logger(__name__)
 
 
 def hash_password(password: str) -> str:

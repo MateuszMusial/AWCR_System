@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 import logger
 
-awcr_logger = logger.get_logger("password_utils logger")
+awcr_logger = logger.get_logger(__name__)
 
 
 @dataclass

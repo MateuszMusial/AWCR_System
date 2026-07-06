@@ -3,7 +3,7 @@ from enum import Enum
 import pandas as pd
 import logger
 
-awcr_logger = logger.get_logger("Data utils logger")
+awcr_logger = logger.get_logger(__name__)
 
 WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
