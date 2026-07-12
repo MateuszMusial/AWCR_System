@@ -5,6 +5,7 @@ from pytest_mock import MockerFixture
 
 from Database.DBHandler import DBHandler
 from GUI.app import GuiHandler
+from services.camera_service import CameraService
 from services.detection_service import DetectionService
 from email_handler import EmailHandler
 
@@ -12,7 +13,7 @@ from email_handler import EmailHandler
 @pytest.fixture()
 def gui_handler() -> GuiHandler:
     """Fixture to create a GuiHandler instance."""
-    return GuiHandler(EmailHandler(), DBHandler(), DetectionService.create())
+    return GuiHandler(EmailHandler(), DBHandler(), DetectionService.create(), CameraService())
 
 
 def test_set_window_common_parts(gui_handler: GuiHandler, mocker: MockerFixture) -> None:

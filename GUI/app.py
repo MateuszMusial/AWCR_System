@@ -1,4 +1,3 @@
-import sys
 import time
 from textwrap import dedent
 
@@ -20,6 +19,7 @@ from Utils.common import display_detection_info, is_valid_email
 from email_handler import EmailHandler
 import logger
 from GUI.session import Session
+from services.camera_service import CameraService
 from services.detection_service import DetectionService
 
 from Utils.password_utils import validate_password_strength
@@ -28,9 +28,6 @@ from Utils.data_utils import prepare_detection_data_for_plot, export_detection_d
 
 awcr_logger = logger.get_logger(__name__)
 
-CAMERA_WIDTH = 900
-CAMERA_HEIGHT = 650
-FPS_VALUE = 25
 ALERT_COOLDOWN_SECONDS = 60
 session = Session()
 
@@ -40,7 +37,13 @@ class GuiHandler:
     This class handles the GUI for the AWCR System.
     It creates the main window, login and register forms, statistics and the camera view.
     """
-    def __init__(self, email_worker: EmailHandler, db_handler: DBHandler, detection_service: DetectionService):
+    def __init__(
+            self,
+            email_worker: EmailHandler,
+            db_handler: DBHandler,
+            detection_service: DetectionService,
+            camera_service: CameraService
+    ):
         self.window = None
         self.frame_counter = 0
         self.last_detections = []
@@ -48,6 +51,7 @@ class GuiHandler:
         self.email_worker = email_worker
         self.db_handler = db_handler
         self.detection_service = detection_service
+        self.camera_service = camera_service
 
     def create_window(self, name: str) -> Tk | None:
         """
@@ -272,24 +276,12 @@ class GuiHandler:
         self.window = tkinter.Tk()
         self.window.title("Camera Window")
         self.window.geometry("1280x720")
-        if sys.platform == "win32":
-            self.cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
-        else:
-            self.cap = cv2.VideoCapture(0)
 
-        if not self.cap.isOpened():
+        if not self.camera_service.open_camera():
             messagebox.showerror("Error", "Can't open the camera!")
-            awcr_logger.error("Error! Can't open the camera!")
             self.window.destroy()
             cv2.destroyAllWindows()
             return
-
-        self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, CAMERA_WIDTH)
-        self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, CAMERA_HEIGHT)
-        self.cap.set(cv2.CAP_PROP_FPS, FPS_VALUE)
-        awcr_logger.info(
-            f"Camera opened with resolution {CAMERA_WIDTH} x {CAMERA_HEIGHT} and {FPS_VALUE} frames per second."
-        )
 
         self.setup_main_layout_fields()
         self.update_frame()
@@ -331,13 +323,12 @@ class GuiHandler:
         """
         Reads a frame from the camera, processes it, and updates the label with the new frame.
         """
-        if not self.cap.isOpened():
+        if not self.camera_service.is_opened():
             awcr_logger.error("Camera is not opened!")
             return
 
-        ret, frame = self.cap.read()
-        if ret:
-            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        frame = self.camera_service.read_frame()
+        if frame is not None:
             self.frame_counter += 1
 
             if self.frame_counter % 4 == 0:
@@ -369,7 +360,7 @@ class GuiHandler:
         """
         Set up the statistics window with all necessary fields.
         """
-        self.cap.release()
+        self.camera_service.release_camera()
         self.window.quit()
         self.window.destroy()
 
@@ -497,7 +488,7 @@ class GuiHandler:
         Quits the program.
         """
         if messagebox.askyesno("Quit", "Do you want to quit?"):
-            self.cap.release()
+            self.camera_service.release_camera()
             self.window.quit()
             self.window.destroy()
             cv2.destroyAllWindows()
